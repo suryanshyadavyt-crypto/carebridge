@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import Map from "./map";
+import heroImage from "./assets/hero.png";
 
 const guidanceResults = {
   "General Health":
@@ -86,16 +87,39 @@ function App() {
       {/* HOME */}
       <main>
         <section className="hero" id="home">
-          <h1>Healthcare, made easier.</h1>
+          <div className="hero-copy">
+            <p className="eyebrow">YOUR EVERYDAY HEALTH COMPASS</p>
+            <h1>Healthcare, made easier.</h1>
 
-          <p>
-            CareBridge helps you understand your next step, find healthcare
-            resources, and take better care of your well-being.
-          </p>
+            <p>
+              CareBridge helps you understand your next step, find healthcare
+              resources and take better care of your well-being.
+            </p>
 
-          <a className="primary-button" href="#guidance">
-            Get Started
-          </a>
+            <div className="hero-actions">
+              <a className="primary-button" href="#guidance">
+                Get Started
+              </a>
+              <a className="text-link" href="#healthcare">
+                Explore nearby care <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </div>
+          <div
+            className="hero-art"
+            aria-label="CareBridge health access illustration"
+          >
+            <span className="orbit orbit-one" aria-hidden="true"></span>
+            <span className="orbit orbit-two" aria-hidden="true"></span>
+            <img
+              src={heroImage}
+              alt="Layered CareBridge platform illustration"
+            />
+            <div className="hero-status">
+              <span className="status-dot" aria-hidden="true"></span>
+              Care, connected
+            </div>
+          </div>
         </section>
 
         {/* FEATURES */}
@@ -105,7 +129,7 @@ function App() {
           <div className="feature-grid">
             {/* HEALTH GUIDANCE */}
             <a href="#guidance" className="feature-card">
-              <div>🩺</div>
+              <div className="feature-icon">🩺</div>
 
               <h3>Health Guidance</h3>
 
@@ -116,7 +140,7 @@ function App() {
 
             {/* FIND HEALTHCARE */}
             <a href="#healthcare" className="feature-card">
-              <div>🏥</div>
+              <div className="feature-icon">🏥</div>
 
               <h3>Find Healthcare</h3>
 
@@ -125,7 +149,7 @@ function App() {
 
             {/* WELL-BEING */}
             <a href="#wellbeing" className="feature-card">
-              <div>❤️</div>
+              <div className="feature-icon">❤️</div>
 
               <h3>Well-being</h3>
 
@@ -136,7 +160,7 @@ function App() {
 
             {/* HEALTH CARD */}
             <a href="#healthcard" className="feature-card">
-              <div>📋</div>
+              <div className="feature-icon">📋</div>
 
               <h3>Health Card</h3>
 
