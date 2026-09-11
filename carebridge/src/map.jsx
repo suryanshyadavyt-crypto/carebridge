@@ -35,13 +35,31 @@ function distanceInKilometres(
 
 function Map({ locateRequest }) {
   const [position, setPosition] = useState(FALLBACK_POSITION);
+  const [locationStatus, setLocationStatus] = useState("locating");
   const [hospitals, setHospitals] = useState([]);
   const [hospitalStatus, setHospitalStatus] = useState("loading");
 
   useEffect(() => {
-    navigator.geolocation?.getCurrentPosition(
-      ({ coords }) => setPosition([coords.latitude, coords.longitude]),
-      () => setPosition(FALLBACK_POSITION),
+    if (!navigator.geolocation) {
+      setLocationStatus("unavailable");
+      return;
+    }
+
+    setLocationStatus("locating");
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        setPosition([coords.latitude, coords.longitude]);
+        setLocationStatus("live");
+      },
+      (error) => {
+        setPosition(FALLBACK_POSITION);
+        setLocationStatus(error.code === 1 ? "denied" : "fallback");
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 15000,
+      },
     );
   }, [locateRequest]);
 
@@ -126,6 +144,17 @@ function Map({ locateRequest }) {
 
       <div className="hospital-results" aria-live="polite">
         <h3>Nearest hospitals</h3>
+        <p className="location-status">
+          {locationStatus === "locating" &&
+            "Getting your exact GPS location..."}
+          {locationStatus === "live" && "Using your live GPS location."}
+          {locationStatus === "denied" &&
+            "Location permission was denied. Allow location access and try again."}
+          {locationStatus === "fallback" &&
+            "GPS could not be reached. Showing the fallback map area."}
+          {locationStatus === "unavailable" &&
+            "This browser does not support location services."}
+        </p>
         {hospitalStatus === "loading" && <p>Searching nearby hospitals...</p>}
         {hospitalStatus === "error" && (
           <p>Hospital search is unavailable right now. Please try again.</p>

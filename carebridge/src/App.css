@@ -55,7 +55,7 @@ body {
   overflow: hidden;
   padding: 90px 8%;
   text-align: left;
-  background: #dff7f1;
+  background: #e9f1f1;
   isolation: isolate;
 }
 
@@ -64,8 +64,8 @@ body {
   inset: 0;
   z-index: -1;
   background-image:
-    linear-gradient(rgba(15, 118, 110, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(15, 118, 110, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(92, 84, 120, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(92, 84, 120, 0.06) 1px, transparent 1px);
   background-size: 34px 34px;
   content: "";
   mask-image: linear-gradient(to right, black, transparent 75%);
@@ -118,7 +118,7 @@ body {
   position: absolute;
   width: 260px;
   height: 260px;
-  border: 1px solid rgba(180, 83, 9, 0.35);
+  border: 1px solid rgba(92, 84, 120, 0.28);
   border-radius: 50%;
   content: "";
 }
@@ -133,7 +133,7 @@ body {
 
 .orbit {
   position: absolute;
-  border: 1px dashed rgba(15, 118, 110, 0.35);
+  border: 1px dashed rgba(92, 84, 120, 0.3);
   border-radius: 50%;
   transform: rotate(-22deg);
 }
@@ -158,11 +158,11 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 14px;
-  border: 1px solid rgba(15, 118, 110, 0.16);
+  border: 1px solid rgba(92, 84, 120, 0.16);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 12px 30px rgba(15, 118, 110, 0.12);
-  color: #115e59;
+  color: #5c5478;
   font-size: 13px;
   font-weight: 800;
 }
@@ -177,7 +177,9 @@ body {
 
 .hero h1 {
   font-size: 48px;
-  color: #115e59;
+  line-height: 1.24;
+  color: #4f506d;
+  word-spacing: 0.14em;
   margin-bottom: 20px;
 }
 
@@ -279,6 +281,12 @@ textarea:focus-visible {
   color: #115e59;
 }
 
+.location-status {
+  margin-bottom: 14px !important;
+  color: #5c5478 !important;
+  font-size: 14px !important;
+}
+
 .hospital-results ol {
   display: grid;
   gap: 10px;
@@ -353,7 +361,7 @@ textarea:focus-visible {
   height: 48px;
   place-items: center;
   border-radius: 14px;
-  background: #e6fffa;
+  background: #f0eef7;
   font-size: 24px;
 }
 
