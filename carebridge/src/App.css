@@ -213,6 +213,66 @@ textarea:focus-visible {
   background-color: #115e59;
 }
 
+.guidance-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 900px;
+  margin: 24px auto 0;
+  gap: 10px;
+}
+
+.guidance-options button {
+  min-height: 52px;
+  margin: 0;
+  padding: 10px 12px;
+  background: #f0eef7;
+  color: #514b6c;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.guidance-options button:hover {
+  background: #ded9ee;
+  color: #403a5c;
+}
+
+.guidance-result {
+  max-width: 760px;
+  margin: 28px auto 0;
+  padding: 24px 26px;
+  border: 1px solid #d8d1e8;
+  border-left: 5px solid #5c5478;
+  border-radius: 10px;
+  background: #fbfaff;
+  text-align: left;
+}
+
+.guidance-result h3 {
+  margin-bottom: 8px;
+  color: #4f506d;
+}
+
+.guidance-result h4 {
+  margin: 20px 0 8px;
+  color: #115e59;
+}
+
+.guidance-result ul {
+  display: grid;
+  gap: 8px;
+  padding-left: 22px;
+  color: #4b5563;
+  line-height: 1.55;
+}
+
+.guidance-result .help-note {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e1ef;
+  color: #8b4054;
+  font-size: 15px;
+}
+
 .result-message {
   max-width: 680px;
   margin: 22px auto 0;
@@ -323,11 +383,15 @@ textarea:focus-visible {
 .feature-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  align-items: stretch;
   gap: 20px;
 }
 
 .feature-card {
-  display: block;
+  display: flex;
+  min-height: 238px;
+  align-items: center;
+  flex-direction: column;
   color: inherit;
   text-decoration: none;
   background: white;
@@ -337,7 +401,27 @@ textarea:focus-visible {
   transition:
     transform 220ms ease,
     box-shadow 220ms ease;
+  position: relative;
+  overflow: hidden;
   animation: rise-in 650ms ease both;
+}
+
+.feature-card::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: #5c5478;
+  content: "";
+}
+
+.feature-healthcare::before {
+  background: #0f766e;
+}
+.feature-wellbeing::before {
+  background: #d9778a;
+}
+.feature-card-info::before {
+  background: #d29a43;
 }
 
 .feature-card:nth-child(2) {
@@ -355,24 +439,54 @@ textarea:focus-visible {
   box-shadow: 0 18px 32px rgba(15, 118, 110, 0.13);
 }
 
+.feature-card:hover .feature-icon {
+  transform: translateY(-3px) rotate(-6deg) scale(1.08);
+}
+
 .feature-icon {
   display: grid;
+  flex: 0 0 48px;
   width: 48px;
   height: 48px;
+  margin-bottom: 16px;
   place-items: center;
   border-radius: 14px;
   background: #f0eef7;
   font-size: 24px;
+  transition: transform 220ms ease;
 }
 
 .feature-card h3 {
-  margin: 15px 0 10px;
+  min-height: 29px;
+  margin: 0 0 10px;
   color: #115e59;
+  text-align: center;
 }
 
 .feature-card p {
+  max-width: 220px;
   color: #6b7280;
   line-height: 1.6;
+  text-align: center;
+}
+
+.mood-prompt {
+  margin-bottom: 16px !important;
+  color: #5c5478 !important;
+  font-weight: 700;
+}
+
+.mood-button {
+  min-width: 116px;
+  border: 1px solid rgba(92, 84, 120, 0.18) !important;
+  background: #f5f2fb !important;
+  color: #514b6c !important;
+}
+
+.mood-button:hover {
+  border-color: #d9778a !important;
+  background: #fff0f3 !important;
+  color: #8b4054 !important;
 }
 
 @media (max-width: 800px) {
@@ -387,6 +501,10 @@ textarea:focus-visible {
 
   .feature-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .guidance-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .nav-links {
@@ -404,6 +522,10 @@ textarea:focus-visible {
   }
   .page-section {
     padding: 70px 20px;
+  }
+
+  .guidance-options {
+    grid-template-columns: 1fr;
   }
 
   .hero-actions {
