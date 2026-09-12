@@ -12,8 +12,39 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-const FALLBACK_POSITION = [27.1767, 78.0081];
+const FALLBACK_POSITIONS = [
+  [28.6139, 77.209],
+  [26.9124, 75.7873],
+  [26.8467, 80.9462],
+  [25.5941, 85.1376],
+  [23.2599, 77.4126],
+];
 const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+
+function getRandomFallbackPosition() {
+  return FALLBACK_POSITIONS[
+    Math.floor(Math.random() * FALLBACK_POSITIONS.length)
+  ];
+}
+
+const appointmentSlots = ["09:30 AM", "11:00 AM", "02:30 PM", "04:00 PM"];
+
+function hospitalDetails(hospital) {
+  const tags = hospital.tags || {};
+  return {
+    ...hospital,
+    address:
+      [tags["addr:housenumber"], tags["addr:street"], tags["addr:city"]]
+        .filter(Boolean)
+        .join(", ") || "Address available after contacting the hospital",
+    phone:
+      tags.phone ||
+      tags["contact:phone"] ||
+      "Contact hospital for phone number",
+    hours: tags.opening_hours || "Hours not listed; call before visiting",
+    slots: appointmentSlots.slice(0, 2 + (hospital.id.length % 3)),
+  };
+}
 
 function distanceInKilometres(
   [latitudeA, longitudeA],
@@ -33,10 +64,13 @@ function distanceInKilometres(
   return earthRadius * 2 * Math.atan2(Math.sqrt(value), Math.sqrt(1 - value));
 }
 
-function Map({ locateRequest }) {
-  const [position, setPosition] = useState(FALLBACK_POSITION);
+function Map({ locateRequest, onHospitalSelect }) {
+  const [fallbackPosition] = useState(getRandomFallbackPosition);
+  const [position, setPosition] = useState(fallbackPosition);
   const [locationStatus, setLocationStatus] = useState("locating");
   const [hospitals, setHospitals] = useState([]);
+  const [selectedHospital, setSelectedHospital] = useState(null);
+  const [totalHospitalCount, setTotalHospitalCount] = useState(0);
   const [hospitalStatus, setHospitalStatus] = useState("loading");
 
   useEffect(() => {
@@ -52,7 +86,7 @@ function Map({ locateRequest }) {
         setLocationStatus("live");
       },
       (error) => {
-        setPosition(FALLBACK_POSITION);
+        setPosition(fallbackPosition);
         setLocationStatus(error.code === 1 ? "denied" : "fallback");
       },
       {
@@ -90,6 +124,7 @@ function Map({ locateRequest }) {
             return {
               id: `${hospital.type}-${hospital.id}`,
               name: hospital.tags?.name || "Unnamed hospital",
+              tags: hospital.tags || {},
               position: hospitalPosition,
               distance: distanceInKilometres(position, hospitalPosition),
             };
@@ -101,10 +136,18 @@ function Map({ locateRequest }) {
           .filter(
             (hospital, index, list) =>
               list.findIndex((item) => item.name === hospital.name) === index,
-          )
-          .slice(0, 5);
+          );
 
-        setHospitals(nearbyHospitals);
+        const detailedHospitals = nearbyHospitals.map(hospitalDetails);
+        setTotalHospitalCount(detailedHospitals.length);
+        setHospitals(detailedHospitals.slice(0, 5));
+        setSelectedHospital((current) =>
+          current
+            ? detailedHospitals.find(
+                (hospital) => hospital.id === current.id,
+              ) || null
+            : null,
+        );
         setHospitalStatus("ready");
       })
       .catch((error) => {
@@ -128,11 +171,24 @@ function Map({ locateRequest }) {
         />
 
         <Marker position={position}>
-          <Popup>📍 Your location</Popup>
+          <Popup>
+            {locationStatus === "live"
+              ? "📍 Your current location"
+              : "📍 Random fallback location"}
+          </Popup>
         </Marker>
 
         {hospitals.map((hospital) => (
-          <Marker key={hospital.id} position={hospital.position}>
+          <Marker
+            key={hospital.id}
+            position={hospital.position}
+            eventHandlers={{
+              click: () => {
+                setSelectedHospital(hospital);
+                onHospitalSelect?.(hospital);
+              },
+            }}
+          >
             <Popup>
               <strong>{hospital.name}</strong>
               <br />
@@ -149,9 +205,9 @@ function Map({ locateRequest }) {
             "Getting your exact GPS location..."}
           {locationStatus === "live" && "Using your live GPS location."}
           {locationStatus === "denied" &&
-            "Location permission was denied. Allow location access and try again."}
+            "Permission not given. Failed to fetch current location. Showing a random fallback area."}
           {locationStatus === "fallback" &&
-            "GPS could not be reached. Showing the fallback map area."}
+            "Failed to fetch current location. Showing a random fallback area."}
           {locationStatus === "unavailable" &&
             "This browser does not support location services."}
         </p>
@@ -162,15 +218,90 @@ function Map({ locateRequest }) {
         {hospitalStatus === "ready" && hospitals.length === 0 && (
           <p>No hospitals found within 10 km.</p>
         )}
+        {hospitalStatus === "ready" && (
+          <div
+            className={`care-capacity ${totalHospitalCount < 3 ? "shortage" : "available"}`}
+          >
+            <div className="care-capacity-heading">
+              <strong>
+                {totalHospitalCount < 3
+                  ? "Limited healthcare availability"
+                  : "Healthcare availability looks good"}
+              </strong>
+              <span>
+                {totalHospitalCount} hospitals within 10 km
+                <span
+                  className="capacity-info"
+                  data-tooltip="Low: fewer than 3 hospitals within 10 km. High: 3 or more hospitals within 10 km. This is an estimate from map data, not live staffing information."
+                  aria-label="Availability standards"
+                  tabIndex="0"
+                >
+                  i
+                </span>
+              </span>
+            </div>
+            <div
+              className="care-capacity-track"
+              aria-label={`${hospitals.length} nearby hospitals found`}
+            >
+              <span
+                style={{ width: `${Math.min(totalHospitalCount * 20, 100)}%` }}
+              ></span>
+            </div>
+            <p>
+              {totalHospitalCount < 3
+                ? "There may be a shortage of hospitals or doctors in this area. Call ahead to confirm availability or expand your search."
+                : "Several nearby hospitals were found. Call ahead to check doctor availability and waiting times."}
+            </p>
+          </div>
+        )}
         {hospitals.length > 0 && (
           <ol>
             {hospitals.map((hospital) => (
               <li key={hospital.id}>
-                <span>{hospital.name}</span>
-                <small>{hospital.distance.toFixed(1)} km away</small>
+                <button
+                  type="button"
+                  className={`hospital-choice ${selectedHospital?.id === hospital.id ? "selected" : ""}`}
+                  onClick={() => {
+                    setSelectedHospital(hospital);
+                    onHospitalSelect?.(hospital);
+                  }}
+                >
+                  <span>{hospital.name}</span>
+                  <small>{hospital.distance.toFixed(1)} km away</small>
+                </button>
               </li>
             ))}
           </ol>
+        )}
+        {selectedHospital && (
+          <section className="hospital-details" aria-live="polite">
+            <p className="details-label">Selected hospital</p>
+            <h3>{selectedHospital.name}</h3>
+            <p>{selectedHospital.address}</p>
+            <p>
+              <strong>Hours:</strong> {selectedHospital.hours}
+            </p>
+            <p>
+              <strong>Phone:</strong> {selectedHospital.phone}
+            </p>
+            <div className="appointment-slots">
+              <strong>Suggested appointment slots</strong>
+              <div>
+                {selectedHospital.slots.map((slot) => (
+                  <span key={slot}>{slot}</span>
+                ))}
+              </div>
+            </div>
+            <a
+              className="route-button"
+              href={`https://www.google.com/maps/dir/?api=1&destination=${selectedHospital.position[0]},${selectedHospital.position[1]}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Show route to hospital ↗
+            </a>
+          </section>
         )}
       </div>
     </>
