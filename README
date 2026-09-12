@@ -1,0 +1,93 @@
+CAREBRIDGE
+
+A simple healthcare-focused web app that brings a few useful things together in one place.
+Live: https://quiz-java-q40o7kuko-suryanshyadavyt-crypto.vercel.app/
+
+What is CareBridge?
+
+The idea behind CareBridge was pretty simple: if someone isn't feeling well, they shouldn't have to jump between different websites just to find basic information or a nearby hospital.
+So I built a small web app that combines:
+- Health guidance for some common problems
+- Nearby hospitals and healthcare facilities
+- An interactive map
+- A basic wellbeing check-in
+- A personal health card for important information
+
+FEATURES
+
+Health Guidance
+
+Select a common health problem and get some basic information and things you can consider doing.
+Find Nearby Hospitals
+With location permission, CareBridge finds nearby healthcare facilities and shows them on a map.
+The map uses Leaflet, while healthcare locations are fetched using OpenStreetMap / Overpass API.
+
+Health Card
+
+A small personal card where you can save things like:
+- Name
+- Blood group
+- Emergency contact
+- Notes
+
+The information is currently saved in the browser using LocalStorage.
+Wellbeing Check-in
+
+A simple way to record how you're feeling and keep track of your check-ins.
+
+Tech Used
+- HTML
+- CSS
+- JavaScript
+- React
+- Vite
+- Leaflet
+- OpenStreetMap
+- Overpass API
+- LocalStorage
+
+Running it locally
+
+Clone the repository:
+
+git clone https://github.com/suryanshyadavyt-crypto/carebridge.git
+cd carebridge
+
+Install the dependencies:
+
+npm install
+Run the development server:
+npm run dev
+Then open the local URL shown by Vite.
+
+Project Structure
+
+carebridge/
+├── src/
+├── public/
+├── index.html
+├── package.json
+├── vite.config.js
+└── README.md
+
+What's next?
+
+Some things I'd like to improve:
+
+- Better hospital information
+- Directions to nearby hospitals
+- Better emergency flow
+- More useful health guidance
+- AI-assisted guidance
+- Hindi / multilingual support
+- Better privacy and data handling
+
+Note
+
+CareBridge is a student project and is not meant to diagnose medical conditions or replace professional medical advice.
+
+Author
+
+Suryansh Yadav
+
+Built while learning and experimenting with web development.
