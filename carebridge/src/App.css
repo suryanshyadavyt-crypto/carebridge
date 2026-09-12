@@ -137,6 +137,33 @@ body {
   font-size: 14px;
 }
 
+.recovery-word-card {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+  padding: 14px;
+  border: 1px solid #f2c6a5;
+  border-radius: 8px;
+  background: #fff7ed;
+  color: #7c2d12;
+  text-align: center;
+}
+
+.recovery-word-card code {
+  justify-content: center;
+  padding: 6px 10px;
+  background: #fff;
+  color: #9a3412;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.recovery-word-card p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .auth-switch {
   margin-top: 24px;
   color: #6b7280;
@@ -154,11 +181,32 @@ body {
   cursor: pointer;
 }
 
+.forgot-password-button {
+  display: block;
+  margin: 14px auto 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #0f766e;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .auth-note {
   margin-top: 28px;
   color: #8b8791;
   font-size: 12px;
   line-height: 1.5;
+  text-align: center;
+}
+
+.demo-access-note {
+  margin-top: 10px;
+  color: #9a3412;
+  font-size: 11px;
+  line-height: 1.45;
   text-align: center;
 }
 

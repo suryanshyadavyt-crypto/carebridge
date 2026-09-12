@@ -110,6 +110,23 @@ const cheerfulSlogans = [
   "Take a breath; there is no need to solve everything at once.",
 ];
 
+const DEMO_ACCESS_EMAIL = "suryanshyadavyt@gmail.com";
+
+const recoveryWords = [
+  "sunrise",
+  "meadow",
+  "harbor",
+  "courage",
+  "kindness",
+  "willow",
+  "bright",
+  "horizon",
+];
+
+function createRecoveryWord() {
+  return recoveryWords[Math.floor(Math.random() * recoveryWords.length)];
+}
+
 const languageOptions = [
   ["en", "English"],
   ["as", "অসমীয়া"],
@@ -232,7 +249,12 @@ const getInitialPath = () => {
 function App() {
   const [authMode, setAuthMode] = useState("login");
   const [authError, setAuthError] = useState("");
-  const [authForm, setAuthForm] = useState({ email: "", password: "" });
+  const [authForm, setAuthForm] = useState({
+    email: "",
+    password: "",
+    recoveryWord: "",
+  });
+  const [newRecoveryWord, setNewRecoveryWord] = useState("");
   const [currentUser, setCurrentUser] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("carebridge-session")) || null;
@@ -339,12 +361,13 @@ function App() {
   const submitAuth = (event) => {
     event.preventDefault();
     const email = authForm.email.trim().toLowerCase();
+    const hasDemoAccess = email === DEMO_ACCESS_EMAIL;
 
     if (!email || !email.includes("@")) {
       setAuthError("Enter a valid email address.");
       return;
     }
-    if (authForm.password.length < 8) {
+    if (!hasDemoAccess && authForm.password.length < 8) {
       setAuthError("Your password must be at least 8 characters.");
       return;
     }
@@ -354,13 +377,43 @@ function App() {
     );
     const account = accounts[email];
 
-    if (authMode === "signup") {
+    if (hasDemoAccess && authMode === "login") {
+      if (!account) {
+        accounts[email] = {
+          password: "",
+          recoveryWord: createRecoveryWord(),
+        };
+        localStorage.setItem("carebridge-accounts", JSON.stringify(accounts));
+      }
+    } else if (authMode === "signup") {
       if (account) {
         setAuthError("An account with this email already exists.");
         return;
       }
-      accounts[email] = { password: authForm.password };
+      const recoveryWord = createRecoveryWord();
+      accounts[email] = { password: authForm.password, recoveryWord };
       localStorage.setItem("carebridge-accounts", JSON.stringify(accounts));
+      setNewRecoveryWord(recoveryWord);
+      setAuthForm({ email: "", password: "", recoveryWord: "" });
+      setAuthError(
+        "Account created. Save your recovery word before signing in.",
+      );
+      return;
+    } else if (authMode === "forgot") {
+      if (
+        !account ||
+        account.recoveryWord?.toLowerCase() !==
+          authForm.recoveryWord.trim().toLowerCase()
+      ) {
+        setAuthError("The email or recovery word is incorrect.");
+        return;
+      }
+      accounts[email] = { ...account, password: authForm.password };
+      localStorage.setItem("carebridge-accounts", JSON.stringify(accounts));
+      setAuthMode("login");
+      setAuthError("");
+      setAuthForm({ email, password: "", recoveryWord: "" });
+      return;
     } else if (!account || account.password !== authForm.password) {
       setAuthError("The email or password is incorrect.");
       return;
@@ -377,7 +430,7 @@ function App() {
         : { name: "", bloodGroup: "", emergencyContact: "", notes: "" },
     );
     setCurrentUser(session);
-    setAuthForm({ email: "", password: "" });
+    setAuthForm({ email: "", password: "", recoveryWord: "" });
     setAuthError("");
   };
 
@@ -430,12 +483,18 @@ function App() {
           <div className="auth-brand">CareBridge</div>
           <p className="auth-kicker">YOUR EVERYDAY HEALTH COMPASS</p>
           <h1 id="auth-title">
-            {authMode === "login" ? "Welcome back." : "Create your account."}
+            {authMode === "login"
+              ? "Welcome back."
+              : authMode === "signup"
+                ? "Create your account."
+                : "Reset your password."}
           </h1>
           <p className="auth-intro">
             {authMode === "login"
               ? "Sign in to keep your care tools close and your health card ready."
-              : "Start a private space for your everyday health information."}
+              : authMode === "signup"
+                ? "Start a private space for your everyday health information."
+                : "Use your email and recovery word to create a new password."}
           </p>
 
           <form className="auth-form" onSubmit={submitAuth}>
@@ -463,37 +522,99 @@ function App() {
                 onChange={updateAuthForm}
                 placeholder="At least 8 characters"
                 minLength="8"
-                required
+                required={
+                  authMode !== "login" ||
+                  authForm.email.trim().toLowerCase() !== DEMO_ACCESS_EMAIL
+                }
               />
             </label>
+            {authMode === "forgot" && (
+              <label>
+                Recovery word
+                <input
+                  autoComplete="off"
+                  name="recoveryWord"
+                  value={authForm.recoveryWord}
+                  onChange={updateAuthForm}
+                  placeholder="Your remembered word"
+                  required
+                />
+              </label>
+            )}
             {authError && (
               <p className="auth-error" role="alert">
                 {authError}
               </p>
             )}
             <button className="auth-submit" type="submit">
-              {authMode === "login" ? "Sign in" : "Create account"}
+              {authMode === "login"
+                ? "Sign in"
+                : authMode === "signup"
+                  ? "Create account"
+                  : "Set new password"}
             </button>
           </form>
 
+          {authMode === "signup" && newRecoveryWord && (
+            <div className="recovery-word-card" role="status">
+              <strong>Your recovery word</strong>
+              <code>{newRecoveryWord}</code>
+              <p>
+                Remember this word. You will need it if you reset your password.
+              </p>
+            </div>
+          )}
+
           <p className="auth-switch">
-            {authMode === "login"
-              ? "New to CareBridge?"
-              : "Already have an account?"}{" "}
+            {authMode === "forgot"
+              ? "Remembered your password?"
+              : authMode === "login"
+                ? "New to CareBridge?"
+                : "Already have an account?"}{" "}
             <button
               type="button"
               onClick={() => {
-                setAuthMode(authMode === "login" ? "signup" : "login");
+                setAuthMode(
+                  authMode === "forgot"
+                    ? "login"
+                    : authMode === "login"
+                      ? "signup"
+                      : "login",
+                );
                 setAuthError("");
+                setNewRecoveryWord("");
               }}
             >
-              {authMode === "login" ? "Create an account" : "Sign in"}
+              {authMode === "forgot"
+                ? "Sign in"
+                : authMode === "login"
+                  ? "Create an account"
+                  : "Sign in"}
             </button>
           </p>
+          {authMode === "login" && (
+            <button
+              className="forgot-password-button"
+              type="button"
+              onClick={() => {
+                setAuthMode("forgot");
+                setAuthError("");
+                setNewRecoveryWord("");
+              }}
+            >
+              Forgot password?
+            </button>
+          )}
           <p className="auth-note">
             This preview stores account data in this browser only. Connect a
             secure auth service before production use.
           </p>
+          {authMode === "login" && (
+            <p className="demo-access-note">
+              Demo access is enabled for the configured CareBridge preview
+              account.
+            </p>
+          )}
         </section>
       </main>
     );
